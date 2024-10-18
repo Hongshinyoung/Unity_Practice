@@ -15,6 +15,8 @@ public class ScoreDatas
 
 public class Rocket : MonoBehaviour
 {
+    public GameObject ground;
+
     private Rigidbody2D _rb2d;
     private float fuel = 100f; //연료
 
@@ -53,7 +55,8 @@ public class Rocket : MonoBehaviour
         if (fuel > 0)
         {
             // TODO : fuel이 넉넉하면 윗 방향으로 SPEED만큼의 힘으로 점프, 모자라면 무시
-            rb.AddForce(Vector2.up * SPEED * POWER);
+            rb.AddForce(Vector2.up * SPEED, ForceMode2D.Impulse); //힘/질량 값으로 속도를 변경
+            //Addforce만으로 올라가기
             fuel -= FUELPERSHOOT;
             Debug.Log("남은연료: " + fuel);
             if (fuel <= 0)
@@ -65,7 +68,8 @@ public class Rocket : MonoBehaviour
 
     public void DisplayInfo()
     {
-        currentScore = (int)transform.position.y;
+        //현재점수 = 내위치 - ground위치
+        currentScore = (int)(transform.position.y - ground.transform.position.y);
         currentScoreTxt.text = $"{currentScore}M";
 
         HighScoreTxt.text = $"HIGH: {HighScoreLogic()}M";
@@ -73,11 +77,14 @@ public class Rocket : MonoBehaviour
 
     public int HighScoreLogic()
     {
-        int highScore = Scores.Count > 0 ? Scores[0] : 0;
+        int highScore = Scores.Count > 0 ? Scores[0] : currentScore;
         if (currentScore > highScore)
         {
             highScore = currentScore;
-            UpdateHighScore();
+            if(fuel <= 0)
+            {
+                UpdateHighScore();
+            }
 
         }
         return highScore;
@@ -92,7 +99,7 @@ public class Rocket : MonoBehaviour
             Scores.RemoveRange(1, Scores.Count - 1);
         }
 
-        SaveScores();
+        SaveScores(); 
 
     }
 
